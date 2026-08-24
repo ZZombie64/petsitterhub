@@ -1,0 +1,41 @@
+# ============================================================
+# PetSitterHub - Ambiente di sviluppo
+# Avvia PostgreSQL (con schema e dati di prova gia' caricati).
+#
+# Uso:
+#   docker compose up -d      avvia il database in background
+#   docker compose down       ferma tutto (i dati restano nel volume)
+#   docker compose down -v     ferma e CANCELLA i dati (ripartenza pulita)
+#
+# Il database sara' raggiungibile su localhost:5432
+#   utente:   petsitter
+#   password: petsitter
+#   db:       petsitterhub
+# ============================================================
+
+services:
+  db:
+    image: postgres:16
+    container_name: petsitterhub-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: petsitter
+      POSTGRES_PASSWORD: petsitter
+      POSTGRES_DB: petsitterhub
+    ports:
+      - "5432:5432"
+    volumes:
+      # I dati del database persistono tra un riavvio e l'altro
+      - pgdata:/var/lib/postgresql/data
+      # Gli script in questa cartella vengono eseguiti in ordine
+      # SOLO al primo avvio (database vuoto), in ordine alfabetico.
+      - ./database/01-schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./database/02-seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U petsitter -d petsitterhub"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
