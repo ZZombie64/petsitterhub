@@ -29,15 +29,21 @@ function toPublicUser(user) {
  */
 async function register(req, res) {
   const { email, password, full_name, role, city, phone } = req.body;
+  const finalRole = role || 'owner';
+
+  const client = await pool.connect();
 
   try {
+    await client.query('BEGIN');
+
     // Verifica che l'email non sia già registrata
-    const existing = await pool.query(
+    const existing = await client.query(
       'SELECT id FROM users WHERE email = $1',
       [email.toLowerCase()]
     );
 
     if (existing.rows.length > 0) {
+      await client.query('ROLLBACK');
       return res.status(409).json({
         error: 'Esiste già un account con questa email.',
       });
@@ -45,21 +51,27 @@ async function register(req, res) {
 
     const password_hash = await bcrypt.hash(password, SALT_ROUNDS);
 
-    const result = await pool.query(
+    const result = await client.query(
       `INSERT INTO users (email, password_hash, full_name, role, city, phone)
        VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING id, email, full_name, role, city, phone, created_at`,
-      [
-        email.toLowerCase(),
-        password_hash,
-        full_name,
-        role || 'owner',
-        city || null,
-        phone || null,
-      ]
+      [email.toLowerCase(), password_hash, full_name, finalRole, city || null, phone || null]
     );
 
     const newUser = result.rows[0];
+
+    // Chi si registra come sitter ottiene subito un profilo sitter vuoto,
+    // in attesa di verifica da parte di un amministratore.
+    if (finalRole === 'sitter') {
+      await client.query(
+        `INSERT INTO sitter_profiles (user_id, bio, accepted_pets, verification_status)
+         VALUES ($1, NULL, NULL, 'in_attesa')`,
+        [newUser.id]
+      );
+    }
+
+    await client.query('COMMIT');
+
     const token = generateToken(newUser);
 
     return res.status(201).json({
@@ -67,8 +79,11 @@ async function register(req, res) {
       token,
     });
   } catch (err) {
+    await client.query('ROLLBACK');
     console.error('Errore durante la registrazione:', err);
     return res.status(500).json({ error: 'Errore interno del server.' });
+  } finally {
+    client.release();
   }
 }
 

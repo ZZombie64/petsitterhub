@@ -6,6 +6,7 @@ import CatalogPage from './pages/CatalogPage';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
+import SitterDashboardPage from './pages/SitterDashboardPage';
 import './App.css';
 
 export default function App() {
@@ -24,6 +25,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <ProfilePage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/pannello-sitter"
+              element={
+                <ProtectedRoute role="sitter">
+                  <SitterDashboardPage />
                 </ProtectedRoute>
               }
             />

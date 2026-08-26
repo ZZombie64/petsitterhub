@@ -1,6 +1,14 @@
 import { useEffect, useState } from 'react';
 import { fetchSitters } from '../api/sitters';
 
+const SERVICE_TABS = [
+  { value: '', label: 'Tutti' },
+  { value: 'passeggiata', label: 'Passeggiata' },
+  { value: 'pet-sitting', label: 'Pet-sitting' },
+  { value: 'pensione', label: 'Pensione' },
+  { value: 'toelettatura', label: 'Toelettatura' },
+];
+
 const initialFilters = { citta: '', animale: '', servizio: '', data: '' };
 
 export default function CatalogPage() {
@@ -31,6 +39,12 @@ export default function CatalogPage() {
     setFilters({ ...filters, [e.target.name]: e.target.value });
   }
 
+  function handleServiceTabClick(value) {
+    const nextFilters = { ...filters, servizio: value };
+    setFilters(nextFilters);
+    loadSitters(nextFilters);
+  }
+
   function handleSubmit(e) {
     e.preventDefault();
     loadSitters(filters);
@@ -44,6 +58,21 @@ export default function CatalogPage() {
   return (
     <div className="catalog-page">
       <h1>Trova un pet-sitter</h1>
+
+      <div className="service-tabs" role="tablist" aria-label="Filtra per tipo di servizio">
+        {SERVICE_TABS.map((tab) => (
+          <button
+            key={tab.value || 'tutti'}
+            type="button"
+            role="tab"
+            aria-selected={filters.servizio === tab.value}
+            className={`service-tab ${filters.servizio === tab.value ? 'active' : ''}`}
+            onClick={() => handleServiceTabClick(tab.value)}
+          >
+            {tab.label}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} className="catalog-filters">
         <label>
@@ -64,17 +93,6 @@ export default function CatalogPage() {
             name="animale"
             placeholder="es. cane"
             value={filters.animale}
-            onChange={handleChange}
-          />
-        </label>
-
-        <label>
-          Tipo di servizio
-          <input
-            type="text"
-            name="servizio"
-            placeholder="es. passeggiata"
-            value={filters.servizio}
             onChange={handleChange}
           />
         </label>

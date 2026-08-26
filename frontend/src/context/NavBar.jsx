@@ -18,6 +18,7 @@ export default function NavBar() {
         <Link to="/">Catalogo</Link>
         {user ? (
           <>
+            {user.role === 'sitter' && <Link to="/pannello-sitter">Il mio pannello</Link>}
             <Link to="/profilo">Il mio profilo</Link>
             <button className="navbar-logout" onClick={handleLogout}>Esci</button>
           </>
