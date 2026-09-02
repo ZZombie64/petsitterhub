@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const authRoutes = require('./routes/authRoutes');
 const sitterRoutes = require('./routes/sitterRoutes');
+const adminRoutes = require('./routes/adminRoutes');
 
 const app = express();
 
@@ -15,6 +16,7 @@ app.get('/api/health', (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/sitters', sitterRoutes);
+app.use('/api/admin', adminRoutes);
 
 // Gestione centralizzata delle rotte non trovate
 app.use((req, res) => {

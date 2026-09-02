@@ -5,13 +5,15 @@
 -- ============================================================
 
 -- Utenti: 2 proprietari, 3 sitter, 1 admin
+-- L'admin ha una password_hash reale (bcrypt) per poter fare login:
+-- email: admin@petsitterhub.com / password: Admin1234!
 INSERT INTO users (email, password_hash, full_name, role, city, phone) VALUES
 ('mario.rossi@example.com',  'hash_finto_1', 'Mario Rossi',    'owner',  'Milano', '3331112221'),
 ('laura.bianchi@example.com','hash_finto_2', 'Laura Bianchi',  'owner',  'Milano', '3331112222'),
 ('giulia.verdi@example.com', 'hash_finto_3', 'Giulia Verdi',   'sitter', 'Milano', '3331112223'),
 ('luca.neri@example.com',    'hash_finto_4', 'Luca Neri',      'sitter', 'Torino', '3331112224'),
 ('sara.gallo@example.com',   'hash_finto_5', 'Sara Gallo',     'sitter', 'Milano', '3331112225'),
-('admin@petsitterhub.com',   'hash_finto_6', 'Amministratore', 'admin',  NULL,     NULL);
+('admin@petsitterhub.com',   '$2b$10$/dZHbK12/dCCdL2.GeOYj.ebWerMo4XRe9v6w1mFGj84IZ3q70eY6', 'Amministratore', 'admin',  NULL,     NULL);
 
 -- Animali dei proprietari (owner_id 1 = Mario, 2 = Laura)
 INSERT INTO pets (owner_id, name, species, size, notes) VALUES

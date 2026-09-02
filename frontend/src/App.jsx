@@ -7,6 +7,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import SitterDashboardPage from './pages/SitterDashboardPage';
+import AdminDashboardPage from './pages/AdminDashboardPage';
 import './App.css';
 
 export default function App() {
@@ -33,6 +34,14 @@ export default function App() {
               element={
                 <ProtectedRoute role="sitter">
                   <SitterDashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute role="admin">
+                  <AdminDashboardPage />
                 </ProtectedRoute>
               }
             />
