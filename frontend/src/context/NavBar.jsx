@@ -1,6 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from './AuthContext';
 import NotificationBell from '../components/NotificationBell';
+import ThemeToggle from '../components/ThemeToggle';
 
 export default function NavBar() {
   const { user, logout } = useAuth();
@@ -24,12 +25,14 @@ export default function NavBar() {
             {user.role === 'owner' && <Link to="/le-mie-prenotazioni">Le mie prenotazioni</Link>}
             <Link to="/profilo">Il mio profilo</Link>
             <NotificationBell />
+            <ThemeToggle />
             <button className="navbar-logout" onClick={handleLogout}>Esci</button>
           </>
         ) : (
           <>
             <Link to="/accedi">Accedi</Link>
             <Link to="/registrati">Registrati</Link>
+            <ThemeToggle />
           </>
         )}
       </div>

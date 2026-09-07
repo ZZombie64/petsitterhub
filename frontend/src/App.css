@@ -9,6 +9,23 @@
   --color-error: #b3261e;
 }
 
+/* ============================================================
+   MODALITA' SCURA (dark mode)
+   Si attiva quando sulla pagina c'e' l'attributo data-theme="dark".
+   Ridefinisce solo i colori: tutto il resto del CSS resta uguale.
+   ============================================================ */
+:root[data-theme='dark'] {
+  --color-bg: #1a1917;
+  --color-surface: #242320;
+  --color-border: #3a3833;
+  --color-text: #ece9e3;
+  --color-muted: #a8a49b;
+  --color-accent: #4a9d76;
+  --color-accent-hover: #5cb488;
+  --color-error: #e06c64;
+}
+
+
 * {
   box-sizing: border-box;
 }
@@ -687,4 +704,19 @@ main {
 .notification-item-unread {
   background: var(--color-bg);
   font-weight: 600;
+}
+
+/* Bottone per cambiare tema (chiaro/scuro) nella barra in alto */
+.theme-toggle {
+  border: 1px solid var(--color-border);
+  background: none;
+  border-radius: 6px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.theme-toggle:hover {
+  border-color: var(--color-accent);
 }
