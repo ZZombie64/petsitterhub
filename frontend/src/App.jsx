@@ -8,6 +8,8 @@ import RegisterPage from './pages/RegisterPage';
 import ProfilePage from './pages/ProfilePage';
 import SitterDashboardPage from './pages/SitterDashboardPage';
 import AdminDashboardPage from './pages/AdminDashboardPage';
+import SitterDetailPage from './pages/SitterDetailPage';
+import MyBookingsPage from './pages/MyBookingsPage';
 import './App.css';
 
 export default function App() {
@@ -19,8 +21,17 @@ export default function App() {
         <main>
           <Routes>
             <Route path="/" element={<CatalogPage />} />
+            <Route path="/sitter/:id" element={<SitterDetailPage />} />
             <Route path="/accedi" element={<LoginPage />} />
             <Route path="/registrati" element={<RegisterPage />} />
+            <Route
+              path="/le-mie-prenotazioni"
+              element={
+                <ProtectedRoute role="owner">
+                  <MyBookingsPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/profilo"
               element={

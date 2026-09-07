@@ -1,4 +1,5 @@
 const pool = require('../db/pool');
+const { createNotification } = require('../utils/notify');
 
 /**
  * GET /api/admin/sitters?status=in_attesa
@@ -39,7 +40,7 @@ async function updateSitterVerification(req, res) {
       `UPDATE sitter_profiles
        SET verification_status = $1
        WHERE id = $2
-       RETURNING id AS sitter_id, verification_status`,
+       RETURNING id AS sitter_id, user_id, verification_status`,
       [verification_status, id]
     );
 
@@ -47,7 +48,13 @@ async function updateSitterVerification(req, res) {
       return res.status(404).json({ error: 'Profilo sitter non trovato.' });
     }
 
-    return res.status(200).json({ sitter: result.rows[0] });
+    const sitter = result.rows[0];
+    const message = sitter.verification_status === 'approvato'
+      ? 'Il tuo profilo è stato approvato! Ora sei visibile nel catalogo.'
+      : 'Il tuo profilo è stato rifiutato dall\'amministratore.';
+    await createNotification(sitter.user_id, 'verifica_sitter', message);
+
+    return res.status(200).json({ sitter });
   } catch (err) {
     console.error('Errore nell\'aggiornamento della verifica sitter:', err);
     return res.status(500).json({ error: 'Errore interno del server.' });

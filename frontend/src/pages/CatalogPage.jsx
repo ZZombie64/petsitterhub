@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { fetchSitters } from '../api/sitters';
 
 const SERVICE_TABS = [
@@ -128,7 +129,7 @@ export default function CatalogPage() {
         {sitters.map((sitter) => (
           <li key={sitter.sitter_id} className="sitter-card">
             <div className="sitter-card-header">
-              <h2>{sitter.full_name}</h2>
+              <h2><Link to={`/sitter/${sitter.sitter_id}`}>{sitter.full_name}</Link></h2>
               <span className="sitter-city">{sitter.city || 'Città non indicata'}</span>
             </div>
 

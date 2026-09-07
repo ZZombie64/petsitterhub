@@ -8,6 +8,16 @@ import {
   addSitterAvailability,
   deleteSitterAvailability,
 } from '../api/sitterProfile';
+import { fetchReceivedBookings, acceptBooking, rejectBooking } from '../api/bookings';
+import BookingChat from '../components/BookingChat';
+
+const BOOKING_STATUS_LABELS = {
+  richiesta: 'In attesa',
+  accettata: 'Accettata (in attesa di pagamento)',
+  confermata: 'Confermata',
+  completata: 'Completata',
+  annullata: 'Annullata',
+};
 
 const STATUS_LABELS = {
   in_attesa: 'In attesa di verifica',
@@ -21,6 +31,7 @@ export default function SitterDashboardPage() {
   const [sitter, setSitter] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [openChatId, setOpenChatId] = useState(null);
 
   // Form profilo
   const [profileForm, setProfileForm] = useState({ bio: '', accepted_pets: '' });
@@ -34,6 +45,37 @@ export default function SitterDashboardPage() {
   // Form nuova disponibilità
   const [availabilityForm, setAvailabilityForm] = useState({ day: '', start_time: '', end_time: '' });
   const [availabilityError, setAvailabilityError] = useState(null);
+
+  // Richieste di prenotazione ricevute
+  const [bookings, setBookings] = useState([]);
+  const [bookingsError, setBookingsError] = useState(null);
+
+  async function loadBookings() {
+    try {
+      const data = await fetchReceivedBookings(token);
+      setBookings(data.bookings);
+    } catch (err) {
+      setBookingsError(err.message);
+    }
+  }
+
+  async function handleAcceptBooking(id) {
+    try {
+      await acceptBooking(token, id);
+      loadBookings();
+    } catch (err) {
+      setBookingsError(err.message);
+    }
+  }
+
+  async function handleRejectBooking(id) {
+    try {
+      await rejectBooking(token, id);
+      loadBookings();
+    } catch (err) {
+      setBookingsError(err.message);
+    }
+  }
 
   async function loadProfile() {
     setLoading(true);
@@ -54,6 +96,7 @@ export default function SitterDashboardPage() {
 
   useEffect(() => {
     loadProfile();
+    loadBookings();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -251,6 +294,51 @@ export default function SitterDashboardPage() {
           <button type="submit">Aggiungi disponibilità</button>
         </form>
         {availabilityError && <p className="form-error">{availabilityError}</p>}
+      </section>
+
+      {/* --- Richieste di prenotazione --- */}
+      <section className="dashboard-section">
+        <h2>Richieste</h2>
+
+        {bookingsError && <p className="form-error">{bookingsError}</p>}
+
+        <ul className="dashboard-list">
+          {bookings.length === 0 && (
+            <li className="dashboard-empty">Nessuna richiesta ricevuta finora.</li>
+          )}
+          {bookings.map((b) => (
+            <li key={b.id} className="dashboard-list-item-column">
+              <div className="dashboard-list-item">
+                <span>
+                  <strong>{b.owner_name}</strong> — {b.service_type} per {b.pet_name} ({b.pet_species})
+                  <br />
+                  {b.start_date} → {b.end_date} · {Number(b.total_price).toFixed(2)} €
+                </span>
+                <span>
+                  <span className={`status-badge status-${b.status}`}>
+                    {BOOKING_STATUS_LABELS[b.status] || b.status}
+                  </span>{' '}
+                  <button
+                    className="chat-toggle"
+                    onClick={() => setOpenChatId(openChatId === b.id ? null : b.id)}
+                  >
+                    {openChatId === b.id ? 'Chiudi chat' : '💬 Chat'}
+                  </button>
+                  {b.status === 'richiesta' && (
+                    <>
+                      {' '}
+                      <button onClick={() => handleAcceptBooking(b.id)}>Accetta</button>{' '}
+                      <button className="link-danger" onClick={() => handleRejectBooking(b.id)}>
+                        Rifiuta
+                      </button>
+                    </>
+                  )}
+                </span>
+              </div>
+              {openChatId === b.id && <BookingChat bookingId={b.id} />}
+            </li>
+          ))}
+        </ul>
       </section>
     </div>
   );

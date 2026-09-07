@@ -121,8 +121,29 @@ export default function AdminDashboardPage() {
           {otherSitters.map((s) => (
             <li key={s.sitter_id} className="dashboard-list-item">
               <span>{s.full_name} — {s.email}</span>
-              <span className={`status-badge status-${s.verification_status}`}>
-                {SITTER_STATUS_LABELS[s.verification_status]}
+              <span>
+                <span className={`status-badge status-${s.verification_status}`}>
+                  {SITTER_STATUS_LABELS[s.verification_status]}
+                </span>
+                {s.verification_status === 'approvato' && (
+                  <>
+                    {' '}
+                    <button
+                      className="link-danger"
+                      onClick={() => handleSitterDecision(s.sitter_id, 'rifiutato')}
+                    >
+                      Rifiuta
+                    </button>
+                  </>
+                )}
+                {s.verification_status === 'rifiutato' && (
+                  <>
+                    {' '}
+                    <button onClick={() => handleSitterDecision(s.sitter_id, 'approvato')}>
+                      Approva
+                    </button>
+                  </>
+                )}
               </span>
             </li>
           ))}
