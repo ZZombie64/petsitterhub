@@ -706,17 +706,19 @@ main {
   font-weight: 600;
 }
 
-/* Bottone per cambiare tema (chiaro/scuro) nella barra in alto */
-.theme-toggle {
-  border: 1px solid var(--color-border);
-  background: none;
-  border-radius: 6px;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-  font-size: 1rem;
-  line-height: 1;
+/* ============================================================
+   CAMPI DEI FORM - colori coerenti col tema (fix dark mode)
+   Senza questa regola, in modalita' scura il testo digitato
+   risultava chiaro su sfondo bianco = illeggibile.
+   ============================================================ */
+input,
+textarea,
+select {
+  background-color: var(--color-surface);
+  color: var(--color-text);
 }
 
-.theme-toggle:hover {
-  border-color: var(--color-accent);
+input::placeholder,
+textarea::placeholder {
+  color: var(--color-muted);
 }
