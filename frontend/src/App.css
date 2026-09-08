@@ -722,3 +722,174 @@ input::placeholder,
 textarea::placeholder {
   color: var(--color-muted);
 }
+
+/* ============================================================
+   RECENSIONI E STELLE
+   ============================================================ */
+.star-rating {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.star-rating-stars {
+  color: #f5a623;
+  letter-spacing: 1px;
+}
+
+.star-rating-value {
+  color: var(--color-muted);
+}
+
+.star-rating-empty {
+  color: var(--color-muted);
+  font-style: italic;
+}
+
+.reviews-section {
+  margin-top: 2rem;
+}
+
+.reviews-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.review-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+}
+
+.review-stars {
+  color: #f5a623;
+  letter-spacing: 1px;
+}
+
+.review-comment {
+  margin: 0.35rem 0 0;
+  font-size: 0.9rem;
+}
+
+/* Box per lasciare una recensione (nelle mie prenotazioni) */
+.review-box {
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  border: 1px dashed var(--color-border);
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.review-box label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+}
+
+.review-box textarea {
+  min-height: 60px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.review-box button {
+  align-self: flex-start;
+  padding: 0.5rem 1rem;
+  border: none;
+  border-radius: 6px;
+  background: var(--color-accent);
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* ============================================================
+   FOTO SITTER E AMBIENTE
+   ============================================================ */
+
+/* Nella dashboard: i due riquadri di caricamento affiancati */
+.photo-upload-grid {
+  display: flex;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.photo-upload-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.photo-upload-label {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.photo-preview,
+.photo-placeholder {
+  width: 180px;
+  height: 135px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  object-fit: cover;
+}
+
+.photo-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  background: var(--color-bg);
+}
+
+/* Nel dettaglio pubblico: le foto che vede chi prenota */
+.sitter-photos {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin: 1rem 0;
+}
+
+.sitter-photo {
+  margin: 0;
+}
+
+.sitter-photo img {
+  width: 260px;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+}
+
+.sitter-photo figcaption {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin-top: 0.3rem;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .photo-preview,
+  .photo-placeholder,
+  .sitter-photo img {
+    width: 100%;
+    height: auto;
+  }
+}
+
+/* Totale guadagni nella dashboard sitter */
+.earnings-total {
+  font-size: 1.05rem;
+  margin: 0 0 1rem;
+}

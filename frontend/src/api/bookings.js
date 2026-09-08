@@ -45,3 +45,15 @@ export function acceptBooking(token, id) {
 export function rejectBooking(token, id) {
   return request(`/bookings/${id}/rifiuta`, { method: 'PUT', token });
 }
+
+export function completeBooking(token, id) {
+  return request(`/bookings/${id}/completa`, { method: 'PUT', token });
+}
+
+export function fetchMyEarnings(token) {
+  return request('/bookings/guadagni', { token });
+}
+
+export function createReview(token, bookingId, payload) {
+  return request(`/bookings/${bookingId}/recensione`, { method: 'POST', token, body: payload });
+}

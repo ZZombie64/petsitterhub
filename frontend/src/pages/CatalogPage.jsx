@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { fetchSitters } from '../api/sitters';
+import StarRating from '../components/StarRating';
 
 const SERVICE_TABS = [
   { value: '', label: 'Tutti' },
@@ -132,6 +133,8 @@ export default function CatalogPage() {
               <h2><Link to={`/sitter/${sitter.sitter_id}`}>{sitter.full_name}</Link></h2>
               <span className="sitter-city">{sitter.city || 'Città non indicata'}</span>
             </div>
+
+            <StarRating media={sitter.media_voti} numero={Number(sitter.numero_recensioni)} />
 
             {sitter.bio && <p className="sitter-bio">{sitter.bio}</p>}
 

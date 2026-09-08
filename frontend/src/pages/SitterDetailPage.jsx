@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { fetchSitterDetail } from '../api/sitters';
+import { fetchSitterDetail, fetchSitterReviews } from '../api/sitters';
 import { fetchMyPets } from '../api/pets';
 import { createBooking } from '../api/bookings';
+import StarRating from '../components/StarRating';
 
-const initialForm = { service_id: '', pet_id: '', start_date: '', end_date: '' };
+const initialForm = { service_id: '', pet_id: '', start_date: '', end_date: '', start_time: '', end_time: '' };
 
 export default function SitterDetailPage() {
   const { id } = useParams();
@@ -13,6 +14,7 @@ export default function SitterDetailPage() {
 
   const [sitter, setSitter] = useState(null);
   const [pets, setPets] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -28,6 +30,9 @@ export default function SitterDetailPage() {
       .then(setSitter)
       .catch((err) => setError(err.message))
       .finally(() => setLoading(false));
+    fetchSitterReviews(id)
+      .then(setReviews)
+      .catch(() => setReviews([]));
   }, [id]);
 
   useEffect(() => {
@@ -51,6 +56,8 @@ export default function SitterDetailPage() {
         pet_id: Number(form.pet_id),
         start_date: form.start_date,
         end_date: form.end_date,
+        start_time: form.start_time,
+        end_time: form.end_time,
       });
       setBookingSuccess(true);
       setForm(initialForm);
@@ -69,6 +76,24 @@ export default function SitterDetailPage() {
     <div className="sitter-detail-page">
       <h1>{sitter.full_name}</h1>
       <p className="sitter-city">{sitter.city || 'Città non indicata'}</p>
+      <StarRating media={sitter.media_voti} numero={Number(sitter.numero_recensioni)} />
+
+      {(sitter.photo_url || sitter.place_photo_url) && (
+        <div className="sitter-photos">
+          {sitter.photo_url && (
+            <figure className="sitter-photo">
+              <img src={sitter.photo_url} alt={`Foto di ${sitter.full_name}`} />
+              <figcaption>Il sitter</figcaption>
+            </figure>
+          )}
+          {sitter.place_photo_url && (
+            <figure className="sitter-photo">
+              <img src={sitter.place_photo_url} alt="Ambiente dove vengono ospitati gli animali" />
+              <figcaption>Dove starà il tuo animale</figcaption>
+            </figure>
+          )}
+        </div>
+      )}
 
       {sitter.bio && <p className="sitter-bio">{sitter.bio}</p>}
 
@@ -172,6 +197,26 @@ export default function SitterDetailPage() {
                   />
                 </label>
 
+                <label>
+                  Ora inizio
+                  <input
+                    type="time"
+                    value={form.start_time}
+                    onChange={(e) => setForm({ ...form, start_time: e.target.value })}
+                    required
+                  />
+                </label>
+
+                <label>
+                  Ora fine
+                  <input
+                    type="time"
+                    value={form.end_time}
+                    onChange={(e) => setForm({ ...form, end_time: e.target.value })}
+                    required
+                  />
+                </label>
+
                 <button type="submit" disabled={submitting}>
                   {submitting ? 'Invio richiesta…' : 'Invia richiesta di prenotazione'}
                 </button>
@@ -185,6 +230,23 @@ export default function SitterDetailPage() {
               </form>
             )}
           </>
+        )}
+      </section>
+
+      <section className="reviews-section">
+        <h2>Recensioni</h2>
+        {reviews.length === 0 ? (
+          <p className="sitter-pets">Ancora nessuna recensione per questo sitter.</p>
+        ) : (
+          <ul className="reviews-list">
+            {reviews.map((r, i) => (
+              <li key={i} className="review-item">
+                <span className="review-stars">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
+                <strong> {r.autore}</strong>
+                {r.comment && <p className="review-comment">{r.comment}</p>}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
     </div>

@@ -33,3 +33,14 @@ export async function fetchSitterDetail(id) {
 
   return data.sitter;
 }
+
+export async function fetchSitterReviews(id) {
+  const response = await fetch(`${API_URL}/sitters/${id}/recensioni`);
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.error || 'Impossibile caricare le recensioni.');
+  }
+
+  return data.reviews;
+}

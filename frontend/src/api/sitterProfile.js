@@ -50,3 +50,30 @@ export function addSitterAvailability(token, payload) {
 export function deleteSitterAvailability(token, id) {
   return request(`/sitters/me/availability/${id}`, { method: 'DELETE', token });
 }
+
+// Carica una foto del sitter (di sé o dell'ambiente).
+// Usa FormData perché stiamo inviando un file, non JSON.
+async function uploadFoto(path, token, file) {
+  const formData = new FormData();
+  formData.append('foto', file);
+
+  const response = await fetch(`${API_URL}${path}`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }, // niente Content-Type: lo mette il browser
+    body: formData,
+  });
+
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data.error || 'Errore durante il caricamento della foto.');
+  }
+  return data;
+}
+
+export function uploadSitterPhoto(token, file) {
+  return uploadFoto('/sitters/me/foto', token, file);
+}
+
+export function uploadSitterPlacePhoto(token, file) {
+  return uploadFoto('/sitters/me/foto-ambiente', token, file);
+}
