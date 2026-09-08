@@ -5,6 +5,7 @@ import { fetchSitterDetail, fetchSitterReviews } from '../api/sitters';
 import { fetchMyPets } from '../api/pets';
 import { createBooking } from '../api/bookings';
 import StarRating from '../components/StarRating';
+import Lightbox from '../components/Lightbox';
 
 // Pagina di dettaglio di un sitter: mostra profilo, foto, disponibilità,
 // recensioni e il modulo di prenotazione.
@@ -26,6 +27,7 @@ export default function SitterDetailPage() {
   const [sitter, setSitter] = useState(null);
   const [pets, setPets] = useState([]);
   const [reviews, setReviews] = useState([]);
+  const [zoomImage, setZoomImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -93,13 +95,23 @@ export default function SitterDetailPage() {
         <div className="sitter-photos">
           {sitter.photo_url && (
             <figure className="sitter-photo">
-              <img src={sitter.photo_url} alt={`Foto di ${sitter.full_name}`} />
+              <img
+                src={sitter.photo_url}
+                alt={`Foto di ${sitter.full_name}`}
+                onClick={() => setZoomImage(sitter.photo_url)}
+                style={{ cursor: 'zoom-in' }}
+              />
               <figcaption>Il sitter</figcaption>
             </figure>
           )}
           {sitter.place_photo_url && (
             <figure className="sitter-photo">
-              <img src={sitter.place_photo_url} alt="Ambiente dove vengono ospitati gli animali" />
+              <img
+                src={sitter.place_photo_url}
+                alt="Ambiente dove vengono ospitati gli animali"
+                onClick={() => setZoomImage(sitter.place_photo_url)}
+                style={{ cursor: 'zoom-in' }}
+              />
               <figcaption>Dove starà il tuo animale</figcaption>
             </figure>
           )}
@@ -260,6 +272,8 @@ export default function SitterDetailPage() {
           </ul>
         )}
       </section>
+
+      <Lightbox src={zoomImage} alt="Immagine ingrandita" onClose={() => setZoomImage(null)} />
     </div>
   );
 }
