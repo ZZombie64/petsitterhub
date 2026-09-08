@@ -1,69 +1,80 @@
 -- ============================================================
--- PetSitterHub - Dati di prova (seed) - Versione 2
--- Da eseguire DOPO schema.sql
--- Le password_hash sono finte, solo per i test.
+-- PetSitterHub - Dati di prova (seed) - versione DEMO ricca
+-- Da eseguire DOPO 01-schema.sql
+--
+-- LOGIN DI PROVA (password uguale per tutti): password123
+--   Proprietari: mario@test.it / laura@test.it
+--   Sitter:      giulia@test.it / luca@test.it / sara@test.it
+--   Admin:       admin@test.it
 -- ============================================================
 
--- Utenti: 2 proprietari, 3 sitter, 1 admin
--- L'admin ha una password_hash reale (bcrypt) per poter fare login:
--- email: admin@petsitterhub.com / password: Admin1234!
+-- ---- UTENTI ----
+-- La password (cifrata) e' la stessa per tutti: password123
 INSERT INTO users (email, password_hash, full_name, role, city, phone) VALUES
-('mario.rossi@example.com',  'hash_finto_1', 'Mario Rossi',    'owner',  'Milano', '3331112221'),
-('laura.bianchi@example.com','hash_finto_2', 'Laura Bianchi',  'owner',  'Milano', '3331112222'),
-('giulia.verdi@example.com', 'hash_finto_3', 'Giulia Verdi',   'sitter', 'Milano', '3331112223'),
-('luca.neri@example.com',    'hash_finto_4', 'Luca Neri',      'sitter', 'Torino', '3331112224'),
-('sara.gallo@example.com',   'hash_finto_5', 'Sara Gallo',     'sitter', 'Milano', '3331112225'),
-('admin@petsitterhub.com',   '$2b$10$/dZHbK12/dCCdL2.GeOYj.ebWerMo4XRe9v6w1mFGj84IZ3q70eY6', 'Amministratore', 'admin',  NULL,     NULL);
+('mario@test.it',  '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Mario Rossi',    'owner',  'Milano',  '3331112221'),
+('laura@test.it',  '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Laura Bianchi',  'owner',  'Torino',  '3331112222'),
+('giulia@test.it', '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Giulia Verdi',   'sitter', 'Milano',  '3331112223'),
+('luca@test.it',   '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Luca Neri',      'sitter', 'Milano',  '3331112224'),
+('sara@test.it',   '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Sara Gallo',     'sitter', 'Torino',  '3331112225'),
+('admin@test.it',  '$2b$10$r1ELQPDK3LhEfolZakE1heTJoib2i75Aut5VjL6j5INIfHEa2e.jq', 'Amministratore', 'admin',  NULL,      NULL);
 
--- Animali dei proprietari (owner_id 1 = Mario, 2 = Laura)
+-- ---- ANIMALI (dei proprietari) ----
 INSERT INTO pets (owner_id, name, species, size, notes) VALUES
 (1, 'Fido',  'cane',  'media',   'Socievole, va d''accordo con altri cani.'),
 (1, 'Milo',  'gatto', 'piccola', 'Timido con gli estranei.'),
-(2, 'Rex',   'cane',  'grande',  'Ha bisogno di lunghe passeggiate.');
+(2, 'Rex',   'cane',  'grande',  'Ha bisogno di lunghe passeggiate.'),
+(2, 'Luna',  'gatto', 'piccola', 'Molto affettuosa.');
 
--- Profili sitter (user_id 3, 4, 5)
+-- ---- PROFILI SITTER ----
+-- Giulia e Sara approvate, Luca in attesa (per testare la verifica admin)
 INSERT INTO sitter_profiles (user_id, bio, accepted_pets, verification_status) VALUES
-(3, 'Amo gli animali, esperienza con cani di ogni taglia.', 'cani, gatti', 'approvato'),
-(4, 'Studente disponibile per passeggiate e pet-sitting.',   'cani',        'in_attesa'),
-(5, 'Toelettatrice con pensione a domicilio.',               'cani, gatti', 'approvato');
+(3, 'Amo gli animali da sempre, esperienza con cani di ogni taglia. Ho un giardino recintato.', 'cani, gatti', 'approvato'),
+(4, 'Studente universitario disponibile per passeggiate e visite a domicilio.', 'cani', 'in_attesa'),
+(5, 'Toelettatrice professionista, offro anche pensione a domicilio in casa con giardino.', 'cani, gatti', 'approvato');
 
--- Servizi (sitter_id fa riferimento a sitter_profiles.id: 1, 2, 3)
+-- ---- SERVIZI ----
 INSERT INTO services (sitter_id, type, price, unit) VALUES
 (1, 'passeggiata',  12.00, 'ora'),
 (1, 'pet-sitting',  25.00, 'giorno'),
 (1, 'pensione',     30.00, 'notte'),
 (2, 'passeggiata',  10.00, 'ora'),
 (3, 'toelettatura', 20.00, 'servizio'),
-(3, 'pensione',     35.00, 'notte');
+(3, 'pensione',     35.00, 'notte'),
+(3, 'passeggiata',  14.00, 'ora');
 
--- Disponibilita' del sitter 1
+-- ---- DISPONIBILITA' ----
 INSERT INTO availability (sitter_id, day, start_time, end_time) VALUES
-(1, '2026-09-01', '09:00', '12:00'),
-(1, '2026-09-01', '15:00', '18:00'),
-(1, '2026-09-02', '09:00', '12:00');
+(1, '2026-09-15', '09:00', '12:00'),
+(1, '2026-09-15', '15:00', '18:00'),
+(1, '2026-09-16', '09:00', '13:00'),
+(3, '2026-09-15', '10:00', '16:00'),
+(3, '2026-09-17', '09:00', '12:00');
 
--- Prenotazione: Mario prenota una passeggiata per Fido da Giulia
-INSERT INTO bookings (owner_id, sitter_id, service_id, pet_id, start_date, end_date, status, total_price, accepted_at) VALUES
-(1, 1, 1, 1, '2026-09-01', '2026-09-01', 'confermata', 12.00, NOW());
+-- ---- PRENOTAZIONI (in vari stati per testare tutto) ----
+-- 1: completata (recensibile/recensita)  2: confermata (pagata)
+-- 3: richiesta (in attesa)               4: accettata (da pagare)
+INSERT INTO bookings (owner_id, sitter_id, service_id, pet_id, start_date, end_date, start_time, end_time, status, total_price, accepted_at) VALUES
+(1, 1, 1, 1, '2026-09-01', '2026-09-01', '14:00', '16:00', 'completata', 24.00, NOW()),
+(2, 1, 3, 3, '2026-09-20', '2026-09-22', NULL,    NULL,    'confermata', 90.00, NOW()),
+(1, 3, 5, 2, '2026-09-25', '2026-09-25', NULL,    NULL,    'richiesta',  20.00, NULL),
+(2, 3, 6, 4, '2026-09-18', '2026-09-19', NULL,    NULL,    'accettata',  35.00, NOW());
 
--- Pagamento collegato alla prenotazione 1
+-- ---- PAGAMENTI (per le prenotazioni gia' pagate) ----
 INSERT INTO payments (booking_id, amount, status, provider_ref, paid_at) VALUES
-(1, 12.00, 'pagato', 'test_stripe_0001', NOW());
+(1, 24.00, 'pagato', 'demo_0001', NOW()),
+(2, 90.00, 'pagato', 'demo_0002', NOW());
 
--- Messaggio di esempio
+-- ---- MESSAGGI ----
 INSERT INTO messages (booking_id, sender_id, content) VALUES
-(1, 1, 'Ciao Giulia, a che ora passi a prendere Fido?');
+(1, 1, 'Ciao Giulia, a che ora passi a prendere Fido?'),
+(1, 3, 'Ciao Mario! Passo verso le 14, va bene?'),
+(2, 2, 'Buongiorno, Rex ha bisogno di due passeggiate al giorno.');
 
--- Recensione di esempio
+-- ---- RECENSIONI (per la prenotazione completata) ----
 INSERT INTO reviews (booking_id, owner_id, sitter_id, rating, comment) VALUES
-(1, 1, 1, 5, 'Puntuale e gentilissima, Fido era felicissimo!');
+(1, 1, 1, 5, 'Puntuale e gentilissima, Fido era felicissimo! Consigliata.');
 
--- Notifiche di esempio
+-- ---- NOTIFICHE ----
 INSERT INTO notifications (user_id, type, content) VALUES
-(3, 'nuova_richiesta',  'Hai una nuova richiesta di prenotazione da Mario Rossi.'),
-(1, 'accettata',        'Giulia Verdi ha accettato la tua prenotazione.');
-
--- Dispute di esempio (aperta da Laura su una futura prenotazione ipotetica)
--- Nota: qui la colleghiamo alla prenotazione 1 solo a scopo dimostrativo
-INSERT INTO disputes (booking_id, opened_by, reason, status) VALUES
-(1, 1, 'Il servizio e'' terminato prima del previsto.', 'aperta');
+(3, 'nuova_richiesta', 'Hai una nuova richiesta di prenotazione da Laura Bianchi.'),
+(1, 'accettata',       'Sara Gallo ha accettato la tua prenotazione.');

@@ -33,6 +33,11 @@ async function listSitters(req, res) {
         sp.bio,
         sp.accepted_pets,
         COALESCE(
+          (SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.sitter_id = sp.id),
+          0
+        ) AS media_voti,
+        (SELECT COUNT(*) FROM reviews r WHERE r.sitter_id = sp.id) AS numero_recensioni,
+        COALESCE(
           (
             SELECT json_agg(
                      json_build_object('id', s.id, 'type', s.type, 'price', s.price, 'unit', s.unit)
@@ -89,7 +94,14 @@ async function getSitterDetail(req, res) {
         u.city,
         sp.bio,
         sp.accepted_pets,
-        sp.verification_status
+        sp.verification_status,
+        sp.photo_url,
+        sp.place_photo_url,
+        COALESCE(
+          (SELECT ROUND(AVG(r.rating), 1) FROM reviews r WHERE r.sitter_id = sp.id),
+          0
+        ) AS media_voti,
+        (SELECT COUNT(*) FROM reviews r WHERE r.sitter_id = sp.id) AS numero_recensioni
       FROM sitter_profiles sp
       JOIN users u ON u.id = sp.user_id
       WHERE sp.id = $1 AND sp.verification_status = 'approvato'

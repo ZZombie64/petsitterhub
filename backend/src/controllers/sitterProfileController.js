@@ -24,6 +24,7 @@ async function getMyProfile(req, res) {
   try {
     const profileResult = await pool.query(
       `SELECT sp.id AS sitter_id, sp.bio, sp.accepted_pets, sp.verification_status,
+              sp.photo_url, sp.place_photo_url,
               u.full_name, u.city, u.email, u.phone
        FROM sitter_profiles sp
        JOIN users u ON u.id = sp.user_id

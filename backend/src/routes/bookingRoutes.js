@@ -6,7 +6,10 @@ const {
   acceptBooking,
   rejectBooking,
   cancelBooking,
+  completeBooking,
+  getMyEarnings,
 } = require('../controllers/bookingsController');
+const { createReview } = require('../controllers/reviewsController');
 const { listMessages, sendMessage } = require('../controllers/messagesController');
 const { createPaymentSession, confirmPayment } = require('../controllers/paymentsController');
 const { authenticate, requireRole } = require('../middleware/authenticate');
@@ -21,11 +24,14 @@ router.use(authenticate);
 router.post('/', requireRole('owner'), createBookingValidation, createBooking);
 router.get('/mie', requireRole('owner'), listMyBookings);
 router.put('/:id/annulla', requireRole('owner'), cancelBooking);
+router.put('/:id/completa', requireRole('owner'), completeBooking);
+router.post('/:id/recensione', requireRole('owner'), createReview);
 router.post('/:id/pagamento', requireRole('owner'), createPaymentSession);
 router.get('/:id/pagamento/conferma', requireRole('owner'), confirmPayment);
 
 // Lato sitter
 router.get('/ricevute', requireRole('sitter'), listReceivedBookings);
+router.get('/guadagni', requireRole('sitter'), getMyEarnings);
 router.put('/:id/accetta', requireRole('sitter'), acceptBooking);
 router.put('/:id/rifiuta', requireRole('sitter'), rejectBooking);
 

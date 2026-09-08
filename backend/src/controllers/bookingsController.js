@@ -17,7 +17,7 @@ async function getSitterProfileId(userId) {
  * Calcola il numero di giorni/notti tra due date (inclusi gli estremi
  * per "giorno", escluso l'ultimo per "notte", come in un hotel).
  */
-function calculateTotalPrice(price, unit, startDate, endDate) {
+function calculateTotalPrice(price, unit, startDate, endDate, startTime, endTime) {
   const start = new Date(startDate);
   const end = new Date(endDate);
   const daysBetween = Math.round((end - start) / (1000 * 60 * 60 * 24));
@@ -28,8 +28,14 @@ function calculateTotalPrice(price, unit, startDate, endDate) {
   if (unit === 'notte') {
     return price * Math.max(daysBetween, 1);
   }
-  // "ora" e "servizio": prezzo fisso per la richiesta (l'MVP non
-  // cattura un numero di ore preciso sulla prenotazione).
+  if (unit === 'ora' && startTime && endTime) {
+    // Calcolo le ore effettive tra ora di inizio e fine (stesso giorno).
+    const [h1, m1] = startTime.split(':').map(Number);
+    const [h2, m2] = endTime.split(':').map(Number);
+    const ore = ((h2 * 60 + m2) - (h1 * 60 + m1)) / 60;
+    return price * Math.max(ore, 1);
+  }
+  // "servizio" o ore non indicate: prezzo fisso.
   return price;
 }
 
@@ -38,7 +44,7 @@ function calculateTotalPrice(price, unit, startDate, endDate) {
  * Il proprietario crea una richiesta di prenotazione.
  */
 async function createBooking(req, res) {
-  const { sitter_id, service_id, pet_id, start_date, end_date } = req.body;
+  const { sitter_id, service_id, pet_id, start_date, end_date, start_time, end_time } = req.body;
 
   try {
     const petResult = await pool.query(
@@ -66,13 +72,13 @@ async function createBooking(req, res) {
     }
 
     const { price, unit } = serviceResult.rows[0];
-    const total_price = calculateTotalPrice(Number(price), unit, start_date, end_date);
+    const total_price = calculateTotalPrice(Number(price), unit, start_date, end_date, start_time, end_time);
 
     const result = await pool.query(
-      `INSERT INTO bookings (owner_id, sitter_id, service_id, pet_id, start_date, end_date, status, total_price)
-       VALUES ($1, $2, $3, $4, $5, $6, 'richiesta', $7)
-       RETURNING id, sitter_id, service_id, pet_id, start_date, end_date, status, total_price, created_at`,
-      [req.user.id, sitter_id, service_id, pet_id, start_date, end_date, total_price]
+      `INSERT INTO bookings (owner_id, sitter_id, service_id, pet_id, start_date, end_date, start_time, end_time, status, total_price)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, 'richiesta', $9)
+       RETURNING id, sitter_id, service_id, pet_id, start_date, end_date, start_time, end_time, status, total_price, created_at`,
+      [req.user.id, sitter_id, service_id, pet_id, start_date, end_date, start_time, end_time, total_price]
     );
 
     await createNotification(
@@ -95,7 +101,7 @@ async function createBooking(req, res) {
 async function listMyBookings(req, res) {
   try {
     const result = await pool.query(
-      `SELECT b.id, b.status, b.start_date, b.end_date, b.total_price, b.accepted_at, b.created_at,
+      `SELECT b.id, b.status, b.start_date, b.end_date, b.start_time, b.end_time, b.total_price, b.accepted_at, b.created_at,
               u.full_name AS sitter_name,
               s.type AS service_type, s.unit,
               p.name AS pet_name
@@ -128,7 +134,7 @@ async function listReceivedBookings(req, res) {
     }
 
     const result = await pool.query(
-      `SELECT b.id, b.status, b.start_date, b.end_date, b.total_price, b.accepted_at, b.created_at,
+      `SELECT b.id, b.status, b.start_date, b.end_date, b.start_time, b.end_time, b.total_price, b.accepted_at, b.created_at,
               u.full_name AS owner_name, u.phone AS owner_phone,
               s.type AS service_type, s.unit,
               p.name AS pet_name, p.species AS pet_species
@@ -268,6 +274,67 @@ async function cancelBooking(req, res) {
   }
 }
 
+// Il proprietario segna come completata una prenotazione confermata (pagata).
+// Solo dopo questo passaggio potrà lasciare una recensione.
+async function completeBooking(req, res) {
+  const { id } = req.params;
+  try {
+    const result = await pool.query(
+      `UPDATE bookings SET status = 'completata'
+       WHERE id = $1 AND owner_id = $2 AND status = 'confermata'
+       RETURNING id, status`,
+      [id, req.user.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        error: 'Prenotazione non trovata o non ancora confermata.',
+      });
+    }
+
+    return res.status(200).json({ booking: result.rows[0] });
+  } catch (err) {
+    console.error('Errore nel completamento della prenotazione:', err);
+    return res.status(500).json({ error: 'Errore interno del server.' });
+  }
+}
+
+// Guadagni del sitter: totale incassato e dettaglio per ogni prenotazione pagata.
+// Contiamo solo le prenotazioni con un pagamento andato a buon fine.
+async function getMyEarnings(req, res) {
+  try {
+    const sitterId = await getSitterProfileId(req.user.id);
+    if (!sitterId) {
+      return res.status(404).json({ error: 'Profilo sitter non trovato.' });
+    }
+
+    const result = await pool.query(
+      `SELECT b.id, b.start_date, b.end_date, b.status, pay.amount, pay.paid_at,
+              u.full_name AS owner_name, s.type AS service_type, pet.name AS pet_name
+       FROM payments pay
+       JOIN bookings b ON b.id = pay.booking_id
+       JOIN users u ON u.id = b.owner_id
+       JOIN services s ON s.id = b.service_id
+       JOIN pets pet ON pet.id = b.pet_id
+       WHERE b.sitter_id = $1 AND pay.status = 'pagato'
+       ORDER BY pay.paid_at DESC`,
+      [sitterId]
+    );
+
+    // Somma di tutti gli incassi
+    const totale = result.rows.reduce((s, r) => s + Number(r.amount), 0);
+
+    return res.status(200).json({
+      totale: totale,
+      numero: result.rows.length,
+      dettaglio: result.rows,
+    });
+  } catch (err) {
+    console.error('Errore nel recupero dei guadagni:', err);
+    return res.status(500).json({ error: 'Errore interno del server.' });
+  }
+}
+
 module.exports = {
   createBooking,
   listMyBookings,
@@ -275,4 +342,6 @@ module.exports = {
   acceptBooking,
   rejectBooking,
   cancelBooking,
+  completeBooking,
+  getMyEarnings,
 };

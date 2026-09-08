@@ -42,7 +42,8 @@ CREATE TABLE pets (
     name      VARCHAR(100) NOT NULL,
     species   VARCHAR(50)  NOT NULL,      -- cane, gatto, ecc.
     size      VARCHAR(20),                -- piccola, media, grande
-    notes     TEXT
+    notes     TEXT,
+    photo_url TEXT
 );
 
 
@@ -57,6 +58,8 @@ CREATE TABLE sitter_profiles (
     accepted_pets       VARCHAR(255),      -- es. "cani, gatti"
     verification_status VARCHAR(20) NOT NULL DEFAULT 'in_attesa'
                         CHECK (verification_status IN ('in_attesa', 'approvato', 'rifiutato')),
+    photo_url           TEXT,
+    place_photo_url     TEXT,
     created_at          TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
@@ -103,6 +106,8 @@ CREATE TABLE bookings (
                 REFERENCES pets(id) ON DELETE RESTRICT,
     start_date  DATE NOT NULL,
     end_date    DATE NOT NULL,
+    start_time  TIME,
+    end_time    TIME,
     status      VARCHAR(20) NOT NULL DEFAULT 'richiesta'
                 CHECK (status IN ('richiesta', 'accettata', 'confermata', 'completata', 'annullata')),
     total_price DECIMAL(10,2),
