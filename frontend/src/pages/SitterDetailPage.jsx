@@ -6,7 +6,18 @@ import { fetchMyPets } from '../api/pets';
 import { createBooking } from '../api/bookings';
 import StarRating from '../components/StarRating';
 
+// Pagina di dettaglio di un sitter: mostra profilo, foto, disponibilità,
+// recensioni e il modulo di prenotazione.
+
 const initialForm = { service_id: '', pet_id: '', start_date: '', end_date: '', start_time: '', end_time: '' };
+
+// Trasforma una data grezza (es. 2026-09-14T22:00:00.000Z) in 14/09/2026
+function formatDate(value) {
+  if (!value) return '';
+  const d = new Date(value);
+  if (isNaN(d)) return value;
+  return d.toLocaleDateString('it-IT');
+}
 
 export default function SitterDetailPage() {
   const { id } = useParams();
@@ -120,7 +131,7 @@ export default function SitterDetailPage() {
           )}
           {sitter.availability.map((a) => (
             <li key={a.id} className="dashboard-list-item">
-              {a.day} · {a.start_time.slice(0, 5)}–{a.end_time.slice(0, 5)}
+              {formatDate(a.day)} · {a.start_time.slice(0, 5)}–{a.end_time.slice(0, 5)}
             </li>
           ))}
         </ul>
